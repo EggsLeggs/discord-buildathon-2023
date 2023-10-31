@@ -1,0 +1,28 @@
+{
+    "hiragana": {
+        "main-kana": {
+            "あ": [
+                {
+                    "romaji": "a",
+                    "kana": "あ"
+                },
+                {
+                    "romaji": "i",
+                    "kana": "い"
+                },
+                {
+                    "romaji": "u",
+                    "kana": "う"
+                },
+                {
+                    "romaji": "e",
+                    "kana": "え"
+                },
+                {
+                    "romaji": "o",
+                    "kana": "お"
+                }
+            ]
+        }
+    }
+}

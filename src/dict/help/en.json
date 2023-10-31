@@ -1,0 +1,43 @@
+{
+    "title": "Practicing Hiragana and Katakana",
+    "body": "</practice hiragana:1168962724659724295> • </practice katakana:1168863923022344314> • </practice both:1168863923022344314>\n\nThis is a bot that helps you practice Hiragana and Katakana. If you haven't learned kana yet, check out the [hiragana guide](https://www.tofugu.com/japanese/learn-hiragana/) or the [katakana guide](https://www.tofugu.com/japanese/learn-katakana/) by Tofugu.\n\n**Examples:**\n- /learn hiragana ``include: a`` ``exclude: all-main-kana が``\n- /learn katakana ``exclude: all-main-kana all-dakuten-kana``",
+    "color": "0xAE4341",
+    "hiragana": {
+        "title": "Hiragana Options",
+        "body": "When you use </practice hiragana:1168962724659724295> or </practice both:1168863923022344314> you can filter what your tested on. By default, all kana is included then you can exclude kana and re-add specific kana.",
+        "fields": [
+            {
+                "title": "Main Kana",
+                "body": "- all-main-kana \n- あ/a \n- か/ka \n- さ/sa \n- た/ta \n- な/na \n- は/ha \n- ま/ma \n- や/ya \n- ら/ra \n- わ/wa"
+            },
+            {
+                "title": "Dakuten Kana",
+                "body": "- all-dakuten-kana \n- が/ga \n- ざ/za \n- だ/da \n- ば/ba \n- ぱ/pa"
+            },
+            {
+                "title": "Combination Kana",
+                "body": "- all-combination-kana \n- きゃ/kya \n- しゃ/sha \n- ちゃ/cha \n- にゃ/nya \n- ひゃ/hya \n- みゃ/mya \n- りゃ/rya \n- ぎゃ/gya \n- じゃ/ja \n- ぢゃ/dya \n- びゃ/bya \n- ぴゃ/pya"
+            }
+        ]
+    },
+    "katakana": {
+        "title": "Katakana Options",
+        "body": "When you use </practice katakana:1168863923022344314> or </practice both:1168863923022344314> you can filter what your tested on. By default, all kana is included then you can exclude kana and re-add specific kana.",
+        "fields": [
+            {
+                "title": "Main Kana",
+                "body": "- all-main-kana \n- ア/a \n- カ/ka \n- サ/sa \n- タ/ta \n- ナ/na \n- ハ/ha \n- マ/ma \n- ヤ/ya \n- ラ/ra \n- ワ/wa"
+            },
+            {
+                "title": "Dakuten Kana",
+                "body": "- all-dakuten-kana \n- ガ/ga \n- ザ/za \n- ダ/da \n- バ/ba \n- パ/pa"
+            },
+            {
+                "title": "Combination Kana",
+                "body": "- all-combination-kana \n- キャ/kya \n- シャ/sha \n- チャ/cha \n- ニャ/nya \n- ヒャ/hya \n- ミャ/mya \n- リャ/rya \n- ギャ/gya \n- ジャ/ja \n- ヂャ/dya \n- ビャ/bya \n- ピャ/pya"
+            }
+        ]
+    },
+    "footer": "Made with 💖 by Amory_ • {time}",
+    "image": "https://cdn.discordapp.com/attachments/728172164192141324/1099856768982593547/Untitled-1.png"
+}
