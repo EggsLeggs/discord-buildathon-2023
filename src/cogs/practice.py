@@ -87,7 +87,7 @@ class QuizView(discord.ui.View):
         for result in self.quiz["completed"]:
             if result["wasCorrect"]:
                 correct += 1
-        incorrect = -correct
+        incorrect = total - correct
         embed = discord.Embed(
             title=self.en_dict["finish"]["title"].format(correct=correct, total=total),
             description=self.en_dict["finish"]["body"],
