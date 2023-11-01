@@ -16,6 +16,7 @@ def generate_answers(answer, possible_answers):
         answer = possible_answers[random.randint(0, len(possible_answers) - 1)]
         if answer not in answers:
             answers.append(answer)
+    random.shuffle(answers)
     return answers
 
 
@@ -127,7 +128,6 @@ class QuizView(discord.ui.View):
 class StartView(discord.ui.View):
     def __init__(self, quiz):
         self.quiz = quiz
-        print(self.quiz)
         super().__init__(timeout=60)  # Timeout after 60 seconds
         with open(
             f"{os.getcwd()}/src/dict/practice/en.json", "r", encoding="utf-8"
@@ -175,11 +175,7 @@ class StartView(discord.ui.View):
         return embed
 
 
-class PracticeCog(
-    commands.Cog
-):  # create a class for our cog that inherits from commands.Cog
-    # this class is used to create a cog, which is a module that can be added to the bot
-
+class PracticeCog(commands.Cog):
     def __init__(
         self, bot
     ):  # this is a special method that is called when the cog is loaded
@@ -198,23 +194,24 @@ class PracticeCog(
     async def learn_hiragana(
         self,
         ctx: discord.ApplicationContext,
-        include: Option(
-            str,
-            "Include Hiragana characters.",
-            required=False,
-        ),
         exclude: Option(
             str,
             "Exclude Hiragana characters.",
             required=False,
         ),
+        include: Option(
+            str,
+            "Include Hiragana characters.",
+            required=False,
+        ),
     ):
-        await ctx.respond(f"Test! {include} {exclude}", embed=self.get_info_message())
+        await ctx.respond(embed=self.get_info_message())
         # Create a thread to play the game in
         message = await ctx.interaction.original_response()
         thread = await message.create_thread(name="Kana Quiz", auto_archive_duration=60)
         await thread.send(
-            embed=self.get_start_message(), view=StartView(self.generate_quiz())
+            embed=self.get_start_message(),
+            view=StartView(self.generate_quiz(exclude, include)),
         )
 
     def get_start_message(self):
@@ -247,27 +244,63 @@ class PracticeCog(
         )  # footers can have icons too
         return embed
 
-    def generate_quiz(self):
-        # Format:
-        # {
-        #   "completed": [
-        #       {
-        #           "romaji": "a",
-        #           "hiragana": "あ",
-        #           "wasCorrect": true
-        #       }
-        #   ],
-        #   "questions": [
-        #       {
-        #           "romaji": "a",
-        #           "hiragana": "あ",
-        #       }
-        #   ],
-        #   "possible-letters": [
-        #       "a", "i", "u", "e", "o"
-        #   ],
-        # }
-        # TODO: Add in the filtering mechanisms
+    def generate_quiz(self, exclude, include):
+        # TODO - This can be optimized by not loading the dictionary every time
+        options = {
+            "all-main-kana": {
+                "a": "あ",
+                "ka": "か",
+                "sa": "さ",
+                "ta": "た",
+                "na": "な",
+                "ha": "は",
+                "ma": "ま",
+                "ya": "や",
+                "ra": "ら",
+                "wa": "わ",
+            },
+            "all-dakuten-kana": {
+                "ga": "が",
+                "za": "ざ",
+                "da": "だ",
+                "ba": "ば",
+                "pa": "ぱ",
+            },
+            "all-combination-kana": {
+                "kya": "きゃ",
+                "sha": "しゃ",
+                "cha": "ちゃ",
+                "nya": "にゃ",
+                "hya": "ひゃ",
+                "mya": "みゃ",
+                "rya": "りゃ",
+                "gya": "ぎゃ",
+                "ja": "じゃ",
+                "dya": "ぢゃ",
+                "bya": "びゃ",
+                "pya": "ぴゃ",
+            },
+        }
+
+        allKana = [
+            value for sub_dict in options.values() for value in sub_dict.values()
+        ]
+        allRomaji = [key for sub_dict in options.values() for key in sub_dict.keys()]
+        translations = {
+            **options["all-main-kana"],
+            **options["all-dakuten-kana"],
+            **options["all-combination-kana"],
+        }
+
+        excludedList = self.convert_option(
+            exclude, options, allKana, allRomaji, translations
+        )
+        reAddList = self.convert_option(
+            include, options, allKana, allRomaji, translations
+        )
+
+        includedList = [kana for kana in allKana if kana not in excludedList]
+        includedList = list(set(includedList + reAddList))
         with open(
             f"{os.getcwd()}/src/config/dictionary.json", "r", encoding="utf-8"
         ) as f:
@@ -277,13 +310,37 @@ class PracticeCog(
             "questions": [],
             "possible-letters": [],
         }
+
         for alphabet in dictionary.keys():
             for kanaGroup in dictionary[alphabet].keys():
                 for kanaSubGroup in dictionary[alphabet][kanaGroup].keys():
-                    for kana in dictionary[alphabet][kanaGroup][kanaSubGroup]:
-                        quiz["questions"].append(kana)
-                        quiz["possible-letters"].append(kana["romaji"])
+                    if kanaSubGroup in includedList:
+                        for kana in dictionary[alphabet][kanaGroup][kanaSubGroup]:
+                            quiz["questions"].append(kana)
+                            quiz["possible-letters"].append(kana["romaji"])
         return quiz
+
+    def convert_option(self, option, options, allKana, allRomaji, translations):
+        # Valid options:
+        characters = []
+        if option is not None:
+            characters = option.split(" ")
+            # Remove any options that aren't a key of options or a key or item of each option
+            characters = [
+                option
+                for option in characters
+                if option in options.keys() or option in allKana or option in allRomaji
+            ]
+            # Translate any romaji to kana
+            characters = [translations.get(option, option) for option in characters]
+            # Expand any kana sets to the kana values nested inside (eg. "all-main-kana" -> ["a", "ka", "sa", ...])
+            for character in characters[:]:
+                if character in options.keys():
+                    characters.remove(character)
+                    characters.extend(options[character].values())
+            # Remove any duplicates
+            characters = list(set(characters))
+        return characters
 
 
 def setup(bot):  # this is called by Pycord to setup the cog

@@ -1,7 +1,7 @@
 {
     "title": "Practicing Hiragana and Katakana",
     "body": "</practice hiragana:1168962724659724295> • </practice katakana:1168863923022344314> • </practice both:1168863923022344314>\n\nThis is a bot that helps you practice Hiragana and Katakana. If you haven't learned kana yet, check out the [hiragana guide](https://www.tofugu.com/japanese/learn-hiragana/) or the [katakana guide](https://www.tofugu.com/japanese/learn-katakana/) by Tofugu.\n\n**Examples:**\n- /learn hiragana ``include: a`` ``exclude: all-main-kana が``\n- /learn katakana ``exclude: all-main-kana all-dakuten-kana``",
-    "color": "0xAE4341",
+    "color": "0xffc146",
     "hiragana": {
         "title": "Hiragana Options",
         "body": "When you use </practice hiragana:1168962724659724295> or </practice both:1168863923022344314> you can filter what your tested on. By default, all kana is included then you can exclude kana and re-add specific kana.",
