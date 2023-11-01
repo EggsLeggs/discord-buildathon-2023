@@ -3,6 +3,9 @@ from discord.ext import commands
 from datetime import datetime
 import json
 import os
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class Help(commands.Cog):
@@ -10,9 +13,11 @@ class Help(commands.Cog):
         self.bot = bot
         with open(f"{os.getcwd()}/src/dict/help/en.json", "r", encoding="utf-8") as f:
             self.en_dict = json.load(f)
+        log.info("Loaded cog Help")
 
     @commands.slash_command(name="help")
     async def help(self, ctx: discord.ApplicationContext):
+        log.info("Help command invoked by %s", ctx.author)
         # This could be optimized by including it in the init
         # This would remove the ability to change the language in the future though
         main_embed = discord.Embed(
@@ -64,6 +69,7 @@ class Help(commands.Cog):
             )
 
         await ctx.respond(embeds=[main_embed, hiragana_embed, katakana_embed])
+        log.info("Help command completed for %s", ctx.author)
 
 
 def setup(bot):

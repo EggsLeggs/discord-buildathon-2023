@@ -5,6 +5,16 @@ from datetime import datetime
 import json
 import os
 import random
+import logging
+
+# TODO - General TODOs
+# - Add error handling for filtering all possible kana
+# - Add an image to the question with the kana
+# - Add alternative language support
+# - Add a better finish message with share buttons and a shareable image
+
+
+log = logging.getLogger(__name__)
 
 
 # TODO - This should not be global, consider moving it into a class or something that can be passed through class instances
@@ -31,6 +41,7 @@ class QuizView(discord.ui.View):
             self.en_dict = json.load(f)
 
     async def callback(self, button, interaction):
+        log.info("Quiz button %s pressed by %s", button.label, interaction.user)
         self.disable_all_items()
         result = self.quiz["questions"].pop(0)
         was_correct = result["romaji"] == self.answers[int(button.label) - 1]
@@ -57,6 +68,9 @@ class QuizView(discord.ui.View):
                 self.quiz["questions"][0]["kana"], answers, "question"
             ),
             view=QuizView(self.quiz, answers),
+        )
+        log.info(
+            "Quiz button %s callback complete for %s", button.label, interaction.user
         )
 
     def generate_question(self, kana, answers, state, answer=None, correctAnswer=None):
@@ -104,6 +118,7 @@ class QuizView(discord.ui.View):
         )
         return embed
 
+    # TODO - The labels should be generated dynamically based on romaji but this can't be done without using subclases
     @discord.ui.button(label="1", style=discord.ButtonStyle.primary)
     async def button_callback(self, button, interaction):
         await self.callback(button, interaction)
@@ -141,6 +156,7 @@ class StartView(discord.ui.View):
 
     @discord.ui.button(label="Get Started!", style=discord.ButtonStyle.green)
     async def button_callback(self, button, interaction):
+        log.info("%s button pressed by %s", button.label, interaction.user)
         self.disable_all_items()
         answers = generate_answers(
             self.quiz["questions"][0]["romaji"], self.quiz["possible-letters"]
@@ -153,6 +169,7 @@ class StartView(discord.ui.View):
             ),
             view=quiz,
         )
+        log.info("%s button callback complete for %s", button.label, interaction.user)
 
     def get_timeout_message(self):
         embed = discord.Embed(
@@ -176,14 +193,13 @@ class StartView(discord.ui.View):
 
 
 class PracticeCog(commands.Cog):
-    def __init__(
-        self, bot
-    ):  # this is a special method that is called when the cog is loaded
+    def __init__(self, bot):
         self.bot = bot
         with open(
             f"{os.getcwd()}/src/dict/practice/en.json", "r", encoding="utf-8"
         ) as f:
             self.en_dict = json.load(f)
+        log.info("Loaded cog PracticeCog")
 
     practiceGroup = SlashCommandGroup(
         "practice",
@@ -205,6 +221,7 @@ class PracticeCog(commands.Cog):
             required=False,
         ),
     ):
+        log.info("Practice Hiragana command invoked by %s", ctx.author)
         await ctx.respond(embed=self.get_info_message())
         # Create a thread to play the game in
         message = await ctx.interaction.original_response()
@@ -213,6 +230,7 @@ class PracticeCog(commands.Cog):
             embed=self.get_start_message(),
             view=StartView(self.generate_quiz(exclude, include)),
         )
+        log.info("Practise Hiragana initalisation complete for %s", ctx.author)
 
     def get_start_message(self):
         embed = discord.Embed(
