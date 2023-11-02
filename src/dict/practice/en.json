@@ -27,6 +27,9 @@
             "question": "0xffffff",
             "incorrect": "0xED4245",
             "correct": "0x57F287" 
+        },
+        "timeout": {
+            "body": "🚫 You took to long to answer the question, feel free to give the quiz another go though!"
         }
     },
     "finish": {

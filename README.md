@@ -6,7 +6,6 @@ The application is a way to practice Hiragana and Katakana. If you haven't learn
 ⚠️ There are still a couple features missing, you'll see them very soon though:
 - a prettier end ui
 - buttons with the options in them
-- some timeout code is still being funny
 - hosting! - This bot will be hosted on a server soon, so you can use it without having to run it yourself.
 
 Please open issues if you find any bugs or have any suggestions!
