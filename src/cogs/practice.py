@@ -8,7 +8,6 @@ import random
 import logging
 
 # TODO - General TODOs
-# - Add error handling for filtering all possible kana
 # - Add an image to the question with the kana
 # - Add alternative language support
 # - Add a better finish message with share buttons and a shareable image
@@ -222,13 +221,15 @@ class PracticeCog(commands.Cog):
         ),
     ):
         log.info("Practice Hiragana command invoked by %s", ctx.author)
+        quiz = self.generate_quiz(exclude, include)
+        if quiz["questions"] == []:
+            return await ctx.respond(embed=self.get_no_questions_message())
         await ctx.respond(embed=self.get_info_message())
-        # Create a thread to play the game in
         message = await ctx.interaction.original_response()
         thread = await message.create_thread(name="Kana Quiz", auto_archive_duration=60)
         await thread.send(
             embed=self.get_start_message(),
-            view=StartView(self.generate_quiz(exclude, include)),
+            view=StartView(quiz),
         )
         log.info("Practise Hiragana initalisation complete for %s", ctx.author)
 
@@ -257,6 +258,26 @@ class PracticeCog(commands.Cog):
         )
         embed.set_footer(
             text=self.en_dict["info"]["footer"].format(
+                time=datetime.today().strftime("%Y/%m/%d")
+            ),
+        )  # footers can have icons too
+        return embed
+
+    def get_no_questions_message(self):
+        embed = discord.Embed(
+            title=self.en_dict["no_questions"]["title"],
+            description=self.en_dict["no_questions"]["body"],
+            color=int(self.en_dict["no_questions"]["color"], 16),
+        )
+        embed.set_author(name=" Menu", icon_url=self.bot.user.avatar.url)
+        embed.set_thumbnail(
+            url="https://cdn-icons-png.flaticon.com/512/4474/4474828.png"
+        )
+        embed.set_image(
+            url=self.en_dict["image"],
+        )
+        embed.set_footer(
+            text=self.en_dict["no_questions"]["footer"].format(
                 time=datetime.today().strftime("%Y/%m/%d")
             ),
         )  # footers can have icons too

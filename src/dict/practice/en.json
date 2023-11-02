@@ -6,6 +6,12 @@
         "body": "Open the thread to get started! When you're ready, click ``start`` and we'll begin!\n\nTo answer the questions, click the button with the correct answer. If you get stuck, feel free to skip.",
         "footer": "Made with 💖 by Amory_ • {time}"
     },
+    "no_questions": {
+        "color": "0xED4245",
+        "title": "This doesn't seem right...",
+        "body": "There are no questions in this quiz, please select different filters and try again.",
+        "footer": "Made with 💖 by Amory_ • {time}"
+    },
     "start": {
         "body": "↓ **Click To Begin** ↓",
         "timeout": {
