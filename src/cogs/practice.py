@@ -38,11 +38,10 @@ class QuizView(discord.ui.View):
             f"{os.getcwd()}/src/dict/practice/en.json", "r", encoding="utf-8"
         ) as f:
             self.en_dict = json.load(f)
-        self.willTimeOut = True
 
     async def callback(self, button, interaction):
         log.info("Quiz button %s pressed by %s", button.label, interaction.user)
-        self.willTimeOut = False
+        self.stop()
         self.disable_all_items()
         result = self.quiz["questions"].pop(0)
         was_correct = result["romaji"] == self.answers[int(button.label) - 1]
@@ -75,10 +74,9 @@ class QuizView(discord.ui.View):
         )
 
     async def on_timeout(self):
-        if self.willTimeOut:
-            log.info("Quiz timed out")
-            self.disable_all_items()
-            await self.message.edit(embed=self.get_timeout_message(), view=self)
+        log.info("Quiz timed out")
+        self.disable_all_items()
+        await self.message.edit(embed=self.get_timeout_message(), view=self)
 
     def generate_question(self, kana, answers, state, answer=None, correctAnswer=None):
         body = ""
@@ -165,18 +163,16 @@ class StartView(discord.ui.View):
             f"{os.getcwd()}/src/dict/practice/en.json", "r", encoding="utf-8"
         ) as f:
             self.en_dict = json.load(f)
-        self.willTimeOut = True
 
     async def on_timeout(self):
-        if self.willTimeOut:
-            log.info("Quiz timed out")
-            self.disable_all_items()
-            await self.message.edit(embed=self.get_timeout_message(), view=self)
+        log.info("Quiz timed out")
+        self.disable_all_items()
+        await self.message.edit(embed=self.get_timeout_message(), view=self)
 
     @discord.ui.button(label="Get Started!", style=discord.ButtonStyle.green)
     async def button_callback(self, button, interaction):
         log.info("%s button pressed by %s", button.label, interaction.user)
-        self.willTimeOut = False
+        self.stop()
         self.disable_all_items()
         answers = generate_answers(
             self.quiz["questions"][0]["romaji"], self.quiz["possible-letters"]
