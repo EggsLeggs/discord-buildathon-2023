@@ -219,9 +219,23 @@ class PracticeCog(commands.Cog):
             "Include Hiragana characters.",
             required=False,
         ),
+        shuffle: Option(
+            bool,
+            "Shuffle the order of the questions. (default: true)",
+            default=True,
+            required=False,
+        ),
+        limit: Option(
+            int,
+            "Limit the number of questions. (default: all)",
+            min_value=1,
+            required=False,
+        ),
     ):
         log.info("Practice Hiragana command invoked by %s", ctx.author)
-        await self.learn_command_response(ctx, exclude, include, ["hiragana"])
+        await self.learn_command_response(
+            ctx, exclude, include, ["hiragana"], shuffle, limit
+        )
         log.info("Practise Hiragana initalisation complete for %s", ctx.author)
 
     @practiceGroup.command(name="katakana", description="Practice Katakana.")
@@ -238,9 +252,23 @@ class PracticeCog(commands.Cog):
             "Include Katakana characters.",
             required=False,
         ),
+        shuffle: Option(
+            bool,
+            "Shuffle the order of the questions. (default: true)",
+            default=True,
+            required=False,
+        ),
+        limit: Option(
+            int,
+            "Limit the number of questions. (default: all)",
+            min_value=1,
+            required=False,
+        ),
     ):
         log.info("Practice Katakana command invoked by %s", ctx.author)
-        await self.learn_command_response(ctx, exclude, include, ["katakana"])
+        await self.learn_command_response(
+            ctx, exclude, include, ["katakana"], shuffle, limit
+        )
         log.info("Practise Katakana initalisation complete for %s", ctx.author)
 
     @practiceGroup.command(name="all", description="Practice Hiragana and Katakana.")
@@ -257,15 +285,29 @@ class PracticeCog(commands.Cog):
             "Include characters.",
             required=False,
         ),
+        shuffle: Option(
+            bool,
+            "Shuffle the order of the questions. (default: true)",
+            default=True,
+            required=False,
+        ),
+        limit: Option(
+            int,
+            "Limit the number of questions. (default: all)",
+            min_value=1,
+            required=False,
+        ),
     ):
         log.info("Practice All command invoked by %s", ctx.author)
         await self.learn_command_response(
-            ctx, exclude, include, ["hiragana", "katakana"]
+            ctx, exclude, include, ["hiragana", "katakana"], shuffle, limit
         )
         log.info("Practise All initalisation complete for %s", ctx.author)
 
-    async def learn_command_response(self, ctx, exclude, include, alphabet):
-        quiz = self.generate_quiz(exclude, include, alphabet)
+    async def learn_command_response(
+        self, ctx, exclude, include, alphabet, shuffle, limit
+    ):
+        quiz = self.generate_quiz(exclude, include, alphabet, shuffle, limit)
         if quiz["questions"] == []:
             return await ctx.respond(embed=self.get_no_questions_message())
         await ctx.respond(embed=self.get_info_message())
@@ -326,7 +368,7 @@ class PracticeCog(commands.Cog):
         )  # footers can have icons too
         return embed
 
-    def generate_quiz(self, exclude, include, alphabets):
+    def generate_quiz(self, exclude, include, alphabets, shuffle, limit):
         # TODO - This can be optimized by not loading the dictionary every time
         options = {
             "all-main-kana": {
@@ -401,8 +443,15 @@ class PracticeCog(commands.Cog):
                         for kana in dictionary[alphabet][kanaGroup][kanaSubGroup]:
                             quiz["questions"].append(kana)
                             quiz["possible-letters"].append(kana["romaji"])
+
         # Randomize the order of the questions
-        random.shuffle(quiz["questions"])
+        if shuffle:
+            random.shuffle(quiz["questions"])
+
+        # Limit the number of questions
+        if limit is not None:
+            quiz["questions"] = quiz["questions"][:limit]
+
         return quiz
 
     def convert_option(self, option, options, allKana, allRomaji, translations):

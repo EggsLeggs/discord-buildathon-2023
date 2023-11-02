@@ -4,7 +4,6 @@
 The application is a way to practice Hiragana and Katakana. If you haven't learnt them yet, you can use this [hiragana guide](https://www.tofugu.com/japanese/learn-hiragana/) or [katakana guide](https://www.tofugu.com/japanese/learn-katakana/) to learn them.
 
 ⚠️ There are still a couple features missing, you'll see them very soon though:
-- katakana practice
 - a prettier end ui
 - buttons with the options in them
 - some timeout code is still being funny
