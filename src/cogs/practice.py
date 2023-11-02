@@ -8,7 +8,7 @@ import random
 import logging
 
 # TODO - General TODOs
-# - Add an image to the question with the kana
+# - Add an image to the question with the kana (pain)
 # - Add alternative language support
 # - Add a better finish message with share buttons and a shareable image
 
@@ -221,7 +221,51 @@ class PracticeCog(commands.Cog):
         ),
     ):
         log.info("Practice Hiragana command invoked by %s", ctx.author)
-        quiz = self.generate_quiz(exclude, include)
+        await self.learn_command_response(ctx, exclude, include, ["hiragana"])
+        log.info("Practise Hiragana initalisation complete for %s", ctx.author)
+
+    @practiceGroup.command(name="katakana", description="Practice Katakana.")
+    async def learn_katakana(
+        self,
+        ctx: discord.ApplicationContext,
+        exclude: Option(
+            str,
+            "Exclude Katakana characters.",
+            required=False,
+        ),
+        include: Option(
+            str,
+            "Include Katakana characters.",
+            required=False,
+        ),
+    ):
+        log.info("Practice Katakana command invoked by %s", ctx.author)
+        await self.learn_command_response(ctx, exclude, include, ["katakana"])
+        log.info("Practise Katakana initalisation complete for %s", ctx.author)
+
+    @practiceGroup.command(name="all", description="Practice Hiragana and Katakana.")
+    async def learn_all(
+        self,
+        ctx: discord.ApplicationContext,
+        exclude: Option(
+            str,
+            "Exclude characters.",
+            required=False,
+        ),
+        include: Option(
+            str,
+            "Include characters.",
+            required=False,
+        ),
+    ):
+        log.info("Practice All command invoked by %s", ctx.author)
+        await self.learn_command_response(
+            ctx, exclude, include, ["hiragana", "katakana"]
+        )
+        log.info("Practise All initalisation complete for %s", ctx.author)
+
+    async def learn_command_response(self, ctx, exclude, include, alphabet):
+        quiz = self.generate_quiz(exclude, include, alphabet)
         if quiz["questions"] == []:
             return await ctx.respond(embed=self.get_no_questions_message())
         await ctx.respond(embed=self.get_info_message())
@@ -231,7 +275,6 @@ class PracticeCog(commands.Cog):
             embed=self.get_start_message(),
             view=StartView(quiz),
         )
-        log.info("Practise Hiragana initalisation complete for %s", ctx.author)
 
     def get_start_message(self):
         embed = discord.Embed(
@@ -283,47 +326,48 @@ class PracticeCog(commands.Cog):
         )  # footers can have icons too
         return embed
 
-    def generate_quiz(self, exclude, include):
+    def generate_quiz(self, exclude, include, alphabets):
         # TODO - This can be optimized by not loading the dictionary every time
         options = {
             "all-main-kana": {
-                "a": "あ",
-                "ka": "か",
-                "sa": "さ",
-                "ta": "た",
-                "na": "な",
-                "ha": "は",
-                "ma": "ま",
-                "ya": "や",
-                "ra": "ら",
-                "wa": "わ",
+                "a": ["あ", "ア"],
+                "ka": ["か", "カ"],
+                "sa": ["さ", "サ"],
+                "ta": ["た", "タ"],
+                "na": ["な", "ナ"],
+                "ha": ["は", "ハ"],
+                "ma": ["ま", "マ"],
+                "ya": ["や", "ヤ"],
+                "ra": ["ら", "ラ"],
+                "wa": ["わ", "ワ"],
             },
             "all-dakuten-kana": {
-                "ga": "が",
-                "za": "ざ",
-                "da": "だ",
-                "ba": "ば",
-                "pa": "ぱ",
+                "ga": ["が", "ガ"],
+                "za": ["ざ", "ザ"],
+                "da": ["だ", "ダ"],
+                "ba": ["ば", "バ"],
+                "pa": ["ぱ", "パ"],
             },
             "all-combination-kana": {
-                "kya": "きゃ",
-                "sha": "しゃ",
-                "cha": "ちゃ",
-                "nya": "にゃ",
-                "hya": "ひゃ",
-                "mya": "みゃ",
-                "rya": "りゃ",
-                "gya": "ぎゃ",
-                "ja": "じゃ",
-                "dya": "ぢゃ",
-                "bya": "びゃ",
-                "pya": "ぴゃ",
+                "kya": ["きゃ", "キャ"],
+                "sha": ["しゃ", "シャ"],
+                "cha": ["ちゃ", "チャ"],
+                "nya": ["にゃ", "ニャ"],
+                "hya": ["ひゃ", "ヒャ"],
+                "mya": ["みゃ", "ミャ"],
+                "rya": ["りゃ", "リャ"],
+                "gya": ["ぎゃ", "ギャ"],
+                "ja": ["じゃ", "ジャ"],
+                "dya": ["ぢゃ", "ヂャ"],
+                "bya": ["びゃ", "ビャ"],
+                "pya": ["ぴゃ", "ピャ"],
             },
         }
 
         allKana = [
             value for sub_dict in options.values() for value in sub_dict.values()
         ]
+        allKana = [item for sublist in allKana for item in sublist]
         allRomaji = [key for sub_dict in options.values() for key in sub_dict.keys()]
         translations = {
             **options["all-main-kana"],
@@ -350,13 +394,15 @@ class PracticeCog(commands.Cog):
             "possible-letters": [],
         }
 
-        for alphabet in dictionary.keys():
+        for alphabet in alphabets:
             for kanaGroup in dictionary[alphabet].keys():
                 for kanaSubGroup in dictionary[alphabet][kanaGroup].keys():
                     if kanaSubGroup in includedList:
                         for kana in dictionary[alphabet][kanaGroup][kanaSubGroup]:
                             quiz["questions"].append(kana)
                             quiz["possible-letters"].append(kana["romaji"])
+        # Randomize the order of the questions
+        random.shuffle(quiz["questions"])
         return quiz
 
     def convert_option(self, option, options, allKana, allRomaji, translations):
@@ -371,12 +417,21 @@ class PracticeCog(commands.Cog):
                 if option in options.keys() or option in allKana or option in allRomaji
             ]
             # Translate any romaji to kana
-            characters = [translations.get(option, option) for option in characters]
+            for option in characters[:]:
+                if option in allRomaji:
+                    characters.remove(option)
+                    characters.extend(translations.get(option, option))
             # Expand any kana sets to the kana values nested inside (eg. "all-main-kana" -> ["a", "ka", "sa", ...])
+            expandedCharacters = []
             for character in characters[:]:
                 if character in options.keys():
                     characters.remove(character)
-                    characters.extend(options[character].values())
+                    expandedCharacters.extend(options[character].values())
+            # flatten the list of lists
+            characters.extend(
+                [item for sublist in expandedCharacters for item in sublist]
+            )
+            print(characters)
             # Remove any duplicates
             characters = list(set(characters))
         return characters
