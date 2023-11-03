@@ -8,10 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 py-cord = "^2.4.1"
-
-
-[tool.poetry.group.dev.dependencies]
 python-dotenv = "^1.0.0"
+
 
 [build-system]
 requires = ["poetry-core"]
