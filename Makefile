@@ -10,3 +10,6 @@ build: poetry.lock pyproject.toml
 
 start: poetry.lock pyproject.toml
 	docker-compose -f docker/docker-compose.yml up --build -d
+
+start-alt: poetry.lock pyproject.toml
+	docker compose -f docker/docker-compose.yml up --build -d
